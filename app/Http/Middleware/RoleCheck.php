@@ -4,10 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
-
+use illuminate\support\Facades\Auth;
 class RoleCheck
 {
     /**
@@ -15,14 +13,15 @@ class RoleCheck
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        foreach($roles as $role){  
-            if (Auth::check() &&Auth::user()->role == $role){
+        foreach ($roles as $role) {
+            if (Auth::check() && Auth::user()->role == $role) {
                 return $next($request);
             }
         }
+    
         Auth::logout();
-        return redirect()->route('login')->with('status','You are not authorized to access this page.');
+        return redirect()->route('login')->with('status', 'You are not authorized to access this page.');
     }
 }
