@@ -10,8 +10,8 @@ class DashboardController extends Controller
     {
         
         
-        $data = []; 
+        $data = [];
 
-        return view('dashboard.blade.php', compact('data'));
+        return view ('dashboard.blade.php', compact('data'));
     }
 }

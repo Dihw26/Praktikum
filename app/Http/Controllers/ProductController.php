@@ -10,9 +10,24 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-     return view('layout');
+      
+        $query = Product::with('supplier');
+
+        
+        if ($request->has('search') && $request->search != ''){
+
+            $search = $request->search;
+            $query->where(function ($q) use($search){
+                $q->where('product_name', 'like', '%' . $search . '%');
+            });
+        }
+
+        $products = $query->paginate(10);
+        return $products;
+
+    return view("master-data.product-master.index-product", compact('products'));
     }
 
     /**
@@ -20,7 +35,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view("master-data.product-master.create-product");
+        $suppliers = Supplier::all();
+        return view("master-data.product-master.create-product", compact('suppliers'));
        
     }
 
@@ -30,11 +46,12 @@ class ProductController extends Controller
         // validasi input data
 $validasi_data = $request->validate([
     'product_name' => 'required|string|max:255',
-    'unit'         => 'required|string|max:50',
-    'type'         => 'required|string|max:50',
+    'unit'         => 'required|string|max:255',
+    'type'         => 'required|string|max:255',
     'information'  => 'nullable|string',
-    'qty'          => 'required|integer',
+    'qty'          => 'required|integer|min:1',
     'producer'     => 'required|string|max:255',
+    'supplier_id'  => 'required|exists:suppliers,id'
 ]);
 
 // Proses simpan data kedalam database
@@ -47,7 +64,8 @@ return redirect()->back()->with('success', 'Product created successfully!');
 
         public function show(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        return view('master-data.product-master.detail-product', compact('product'));
     }
 
     /**
@@ -55,7 +73,8 @@ return redirect()->back()->with('success', 'Product created successfully!');
      */
     public function edit(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        return view('master-data.product-master.edit-product', compact('product'));
     }
 
     /**
@@ -63,7 +82,26 @@ return redirect()->back()->with('success', 'Product created successfully!');
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'product_name' => 'required|string|max:255',
+            'unit' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'information' => 'nullable|string',
+            'qyt' => 'required|integer|min:1',
+            'producer' => 'required|string|max:255',
+        ]);
+
+        $product = Product::findOrFail($id);
+        $product->update([
+            'product_name' => $request->product_name,
+            'unit' => $request->unit,
+            'type' => $request->type,
+            'information' => $request->information,
+            'qyt' => $request->qyt,
+            'producer' => $request->producer,
+        ]);
+
+        return redirect()->back()->with('success', 'Product update Successfully!');
     }
 
     /**
@@ -71,6 +109,11 @@ return redirect()->back()->with('success', 'Product created successfully!');
      */
     public function destroy(string $id)
     {
-        //
+        $product = product::find($id);
+        if ($product){
+            $product->delete();
+            return redirect()->route('product')->with('succes', 'product berhasil dihapus. ');
+        }
+        return redirect()->route('product')->with('error', 'product tidak ditemukan. ');
     }
 }

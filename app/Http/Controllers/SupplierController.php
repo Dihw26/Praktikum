@@ -12,7 +12,7 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        $suppliers = Supplier::all(); // Get all suppliers to pass to the view
+        $suppliers = Supplier::all();
         return view('layout', compact('suppliers'));
     }
 
@@ -36,7 +36,6 @@ class SupplierController extends Controller
             'comment' => 'required|string|max:255',
         ]);
         
-        // Process saving data to the database
         Supplier::create($validated_data);
         
         return redirect()->back()->with('success', 'Supplier created successfully!');

@@ -8,8 +8,7 @@ class ReportController extends Controller
 {
     public function index()
     {
-        // Ambil semua laporan dari database
-        $reports = []; // Tambahkan logika untuk mengambil laporan dari model
+        $reports = [];
 
         return view('reports.index', compact('reports'));
     }
